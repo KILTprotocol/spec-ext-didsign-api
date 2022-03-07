@@ -24,8 +24,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ### Types
 
 ```typescript
-interface InjectedWeb3 {
-    /** `extensionId` references the extension on the `InjectedWeb3` object but is not used by the dApp */
+interface GlobalKilt {
+    /** `extensionId` references the extension on the `GlobalKilt` object but is not used by the dApp */
     [extensionId: string]: InjectedWindowProvider
 }
 
@@ -48,17 +48,17 @@ interface Signed {
 
 ### DApp consumes the API exposed by extension
 
-The dApp MUST create the `window.injectedWeb3` object as early as possible to indicate its support of the API to the extension.
+The dApp MUST create the `window.kilt` object as early as possible to indicate its support of the API to the extension.
 
 ```typescript
-window.injectedWeb3 = {}
+window.kilt = {}
 ```
 
-The dApp can afterwards get all available extensions by iterating over the `window.injectedWeb3` object.
+The dApp can afterwards get all available extensions by iterating over the `window.kilt` object.
 
 ```typescript
 function getWindowExtensions(): InjectedWindowProvider[] {
-    return Object.values(window.injectedWeb3);
+    return Object.values(window.kilt);
 }
 ```
 
@@ -68,10 +68,10 @@ The user selects an extension from this list, and the communication starts from 
 
 ### Extension injects its API into a webpage
 
-The extension MUST only inject itself into pages having the `window.injectedWeb3` object.
+The extension MUST only inject itself into pages having the `window.kilt` object.
 
 ```typescript
-(window.injectedWeb3 as InjectedWeb3).myDidExtension = {
+(window.kilt as GlobalKilt).myDidExtension = {
     signWithDid: async (
         plaintext: string,
     ): Promise<Signed> => {
