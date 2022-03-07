@@ -90,12 +90,11 @@ The extension SHOULD perform the following tasks in `signWithDid`:
 ## Cryptography
 
 The signing is done using an authorization key of a DID.
-The allowed types for these keys are sr25519, ed25519, and ecdsa. TODO: link to spec.
+The allowed types for these keys are sr25519, ed25519, and ecdsa.
 
 * The type sr25519 uses Schnorr signature scheme with Curve25519 keypair.
 * The type ed25519 uses Ed25519 signature scheme with Curve25519 keypair.
 * The type ecdsa uses ECDSA signature scheme with secp256k1 curve keypair and blake2 as the hashing algorithm.
-The signature consists of R, S, and the recovered bit. // TODO: is this sentence necessary?
 
 
 ## The signing flow
