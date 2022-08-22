@@ -1,4 +1,4 @@
-# KILT DID Sign API (Draft Spec version 1.0)
+# KILT DID Sign API (Spec version 1.0)
 
 ## Definitions
 
