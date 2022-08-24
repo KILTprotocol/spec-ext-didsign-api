@@ -1,4 +1,4 @@
-# KILT DID Sign API (Spec version 1.0)
+# KILT DID Sign API (Spec version 1.1)
 
 ## Definitions
 
@@ -34,11 +34,26 @@ interface InjectedWindowProvider {
         /** Text to be signed */
         plaintext: string,
     ) => Promise<Signed>
+    
+    signExtrinsicWithDid: (
+        /** The extrinsic to be DID-authorized as hex-encoded string */
+        extrinsic: `0x${string}`,
+        /** KILT address that will be submitting the transaction  */
+        submitter: string,
+    ) => Promise<SignedExtrinsic>;
 }
 
 interface Signed {
     /** Signature of the input as hex-encoded string */
-    signature: string;
+    signature: `0x${string}`;
+
+    /** URI of the DID authentication key used to sign the input */
+    didKeyUri: string;
+}
+
+interface SignedExtrinsic {
+    /** The signed extrinsic as hex-encoded string */
+    signed: `0x${string}`;
 
     /** URI of the DID authentication key used to sign the input */
     didKeyUri: string;
@@ -78,10 +93,17 @@ The extension MUST only inject itself into pages having the `window.kilt` object
         /*...*/
         return { signature, didKeyUri };
     },
+    signExtrinsicWithDid: async (
+        extrinsic: `0x${string}`,
+        submitter: string,
+    ): Promise<SignedExtrinsic> => {
+        /*...*/
+        return { signed, didKeyUri };
+    },
 } as InjectedWindowProvider;
 ```
 
-The extension SHOULD perform the following tasks in `signWithDid`:
+The extension SHOULD perform the following tasks in `signWithDid` and `signExtrinsicWithDid`:
 - protect against Denial-of-Service attacks where the dApp floods the extension with requests
 - ensure that the user has previously authorized interaction with this dApp
 - otherwise, request user authorization for this interaction
@@ -99,18 +121,22 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
 
 ## The signing flow
 
-1. The dApp calls `signWithDid` passing the plaintext as a parameter.
-2. The extension presents to the user the interface to sign. It MUST display the plaintext for user to inspect.
+1. The dApp calls `signWithDid` passing the plaintext as a parameter 
+   or `signExtrinsicWithDid` passing the extrinsic and the submitter.
+2. The extension presents to the user the interface to sign. 
+   If `signWithDid` was called, it MUST display the plaintext for user to inspect.
+   If `signExtrinsicWithDid` was called, it MUST display the extrinsic details (e.g. section, method, and parameters) for user to inspect.
    It SHOULD allow the user to choose the DID to use for signing.
    It SHOULD alert the user that this DID will be exposed.
    It SHOULD allow the user to reject the signing.
 3. The extension creates the signature of the plaintext using the authorization key of the chosen DID.
-4. The extension resolves the promise returned from `signWithDid` with the signature and the URI of the key used.
+4. The extension resolves the promise returned from `signWithDid` with the signature and the URI of the key used
+   or the promise returned from `signExtrinsicWithDid` with the signed extrinsic and also the URI of the key used.
 
 
 ## Errors
 
-The promise returned by a call to `signWithDid` MUST be rejected with an instance of `Error`
+The promise returned by a call to `signWithDid` or `signExtrinsicWithDid` MUST be rejected with an instance of `Error`
 if an error happens during the flow. In case the user explicitly rejects the signing of the plaintext,
 the name and the message properties of the error SHOULD include `Rejected`.
 In case the extension was closed otherwise, the name and the message properties of the error SHOULD include `Closed`.
