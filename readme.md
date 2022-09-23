@@ -30,6 +30,8 @@ interface GlobalKilt {
 }
 
 interface InjectedWindowProvider {
+    getSignedDidCreationExtrinsic: () => Promise<SignedDidCreationExtrinsic>
+
     signWithDid: (
         /** Text to be signed */
         plaintext: string,
@@ -41,6 +43,11 @@ interface InjectedWindowProvider {
         /** KILT address that will be submitting the transaction  */
         submitter: string,
     ) => Promise<SignedExtrinsic>;
+}
+
+interface SignedDidCreationExtrinsic {
+    /** The signed DID creation extrinsic as hex-encoded string */
+    signedExtrinsic: `0x${string}`;
 }
 
 interface Signed {
@@ -87,6 +94,10 @@ The extension MUST only inject itself into pages having the `window.kilt` object
 
 ```typescript
 (window.kilt as GlobalKilt).myDidExtension = {
+    getSignedDidCreationExtrinsic: async (): Promise<SignedDidCreationExtrinsic> => {
+        /*...*/
+        return { signedExtrinsic }
+    },
     signWithDid: async (
         plaintext: string,
     ): Promise<Signed> => {
@@ -103,7 +114,7 @@ The extension MUST only inject itself into pages having the `window.kilt` object
 } as InjectedWindowProvider;
 ```
 
-The extension SHOULD perform the following tasks in `signWithDid` and `signExtrinsicWithDid`:
+The extension SHOULD perform the following tasks in `getSignedDidCreationExtinsic`, `signWithDid` and `signExtrinsicWithDid`:
 - protect against Denial-of-Service attacks where the dApp floods the extension with requests
 - ensure that the user has previously authorized interaction with this dApp
 - otherwise, request user authorization for this interaction
@@ -111,12 +122,27 @@ The extension SHOULD perform the following tasks in `signWithDid` and `signExtri
 
 ## Cryptography
 
-The signing is done using an authorization key of a DID.
+The signing of `getSignedDidCreationExtinsic` is done using a keypair.
+The allowed types for these keys are sr25519 and ed25519.
+
+The signing of `signWithDid` and `signExtrinsicWithDid` is done using an authorization key of a DID.
 The allowed types for these keys are sr25519, ed25519, and ecdsa.
 
 * The type sr25519 uses Schnorr signature scheme with Curve25519 keypair.
 * The type ed25519 uses Ed25519 signature scheme with Curve25519 keypair.
 * The type ecdsa uses ECDSA signature scheme with secp256k1 curve keypair and blake2 as the hashing algorithm.
+
+## DID Creation
+
+1. The dApp calls `getSignedDidCreationExtinsic`.
+2. The extension presents an interface for generating and signing the on-chain DID creation extrinsic.
+    It SHOULD allow the user to choose the keypair for signing.
+    It SHOULD allow the user to reject the creation and signing of the extrinsic.
+3. The extension generates and signs the on-chain DID creation extrinsic
+    It MUST include an authentication key.
+    It MAY include other keys and services.
+4. The extension resolves the promise returned from `getSignedDidCreationExtinsic` with the signed extrinsic.
+
 
 
 ## The signing flow
@@ -136,7 +162,7 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
 
 ## Errors
 
-The promise returned by a call to `signWithDid` or `signExtrinsicWithDid` MUST be rejected with an instance of `Error`
+The promise returned by a call to `getSignedDidCreationExtinsic`, `signWithDid` or `signExtrinsicWithDid` MUST be rejected with an instance of `Error`
 if an error happens during the flow. In case the user explicitly rejects the signing of the plaintext,
 the name and the message properties of the error SHOULD include `Rejected`.
 In case the extension was closed otherwise, the name and the message properties of the error SHOULD include `Closed`.
