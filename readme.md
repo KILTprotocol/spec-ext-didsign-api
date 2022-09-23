@@ -143,6 +143,7 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
     It MUST include an authentication key.
     It MAY include other keys and services.
 4. The extension resolves the promise returned from `getSignedDidCreationExtinsic` with the signed extrinsic.
+5. The dApp submits the extrinsic or delegates the submission to another service.
 
 
 ## The signing flow
