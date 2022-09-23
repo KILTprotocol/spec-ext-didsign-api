@@ -30,7 +30,10 @@ interface GlobalKilt {
 }
 
 interface InjectedWindowProvider {
-    getSignedDidCreationExtrinsic: () => Promise<SignedDidCreationExtrinsic>
+    getSignedDidCreationExtrinsic: (
+        /** KILT address that will be submitting the transaction  */
+        submitter: string,
+    ) => Promise<SignedDidCreationExtrinsic>
 
     signWithDid: (
         /** Text to be signed */
@@ -94,7 +97,9 @@ The extension MUST only inject itself into pages having the `window.kilt` object
 
 ```typescript
 (window.kilt as GlobalKilt).myDidExtension = {
-    getSignedDidCreationExtrinsic: async (): Promise<SignedDidCreationExtrinsic> => {
+    getSignedDidCreationExtrinsic: async (
+        submitter: string,
+    ): Promise<SignedDidCreationExtrinsic> => {
         /*...*/
         return { signedExtrinsic }
     },
@@ -135,7 +140,7 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
 
 ## DID Creation
 
-1. The dApp calls `getSignedDidCreationExtinsic`.
+1. The dApp calls `getSignedDidCreationExtinsic` passing the submitter as a parameter.
 2. The extension presents an interface for generating and signing the on-chain DID creation extrinsic.
     It SHOULD allow the user to choose the keypair for signing.
     It SHOULD allow the user to reject the creation and signing of the extrinsic.
@@ -143,7 +148,7 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
     It MUST include an authentication key.
     It MAY include other keys and services.
 4. The extension resolves the promise returned from `getSignedDidCreationExtinsic` with the signed extrinsic.
-5. The dApp submits the extrinsic or delegates the submission to another service.
+5. The dApp submits the extrinsic or sends it to the the submitter it specified in the API call.
 
 
 ## The signing flow
