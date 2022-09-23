@@ -132,6 +132,7 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
 * The type ed25519 uses Ed25519 signature scheme with Curve25519 keypair.
 * The type ecdsa uses ECDSA signature scheme with secp256k1 curve keypair and blake2 as the hashing algorithm.
 
+
 ## DID Creation
 
 1. The dApp calls `getSignedDidCreationExtinsic`.
@@ -142,7 +143,6 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
     It MUST include an authentication key.
     It MAY include other keys and services.
 4. The extension resolves the promise returned from `getSignedDidCreationExtinsic` with the signed extrinsic.
-
 
 
 ## The signing flow
