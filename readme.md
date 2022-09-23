@@ -144,7 +144,7 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
 2. The extension presents an interface for generating and signing the on-chain DID creation extrinsic.
     It SHOULD allow the user to choose the keypair for signing.
     It SHOULD allow the user to reject the creation and signing of the extrinsic.
-3. The extension generates and signs the on-chain DID creation extrinsic
+3. The extension generates and signs the on-chain DID creation extrinsic.
     It MUST include an authentication key.
     It MAY include other keys and services.
 4. The extension resolves the promise returned from `getSignedDidCreationExtinsic` with the signed extrinsic.
