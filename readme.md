@@ -49,7 +49,7 @@ interface InjectedWindowProvider {
         extrinsic: `0x${string}`,
         /** KILT address that will be submitting the transaction  */
         submitter: string,
-        /** Optional: The DID URI the extension should use to authorize the extrinsic */
+        /** Optional: The DID URI that the extension should use to authorize the extrinsic */
         didUri: string,
     ) => Promise<SignedExtrinsic>;
 }
