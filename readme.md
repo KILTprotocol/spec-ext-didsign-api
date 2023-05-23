@@ -40,7 +40,7 @@ interface InjectedWindowProvider {
     signWithDid: (
         /** Text to be signed */
         plaintext: string,
-        /** Optional: The DID URI the extension should use to sign the text */
+        /** Optional: The DID URI that the extension should use to sign the text */
         didUri: string,
     ) => Promise<Signed>
     
