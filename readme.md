@@ -33,7 +33,7 @@ interface InjectedWindowProvider {
     getSignedDidCreationExtrinsic: (
         /** KILT address that will be submitting the transaction  */
         submitter: string,
-        /** Optional: the pending DID URI, submitting the returned extrinsic should create a DID with the same subject */
+        /** Optional: the pending DID URI. Submitting the returned extrinsic should create a DID with the same subject */
         pendingDidUri?: string,
     ) => Promise<SignedDidCreationExtrinsic>
 
