@@ -1,4 +1,4 @@
-# KILT DID Sign API (Spec version 1.1)
+# KILT DID Sign API (Spec version 1.2)
 
 ## Definitions
 
@@ -33,11 +33,15 @@ interface InjectedWindowProvider {
     getSignedDidCreationExtrinsic: (
         /** KILT address that will be submitting the transaction  */
         submitter: string,
+        /** Optional: the pending DID URI. Submitting the returned extrinsic should create a DID with the same subject */
+        pendingDidUri?: string,
     ) => Promise<SignedDidCreationExtrinsic>
 
     signWithDid: (
         /** Text to be signed */
         plaintext: string,
+        /** Optional: The DID URI that the extension should use to sign the text */
+        didUri: string,
     ) => Promise<Signed>
     
     signExtrinsicWithDid: (
@@ -45,6 +49,8 @@ interface InjectedWindowProvider {
         extrinsic: `0x${string}`,
         /** KILT address that will be submitting the transaction  */
         submitter: string,
+        /** Optional: The DID URI that the extension should use to authorize the extrinsic */
+        didUri: string,
     ) => Promise<SignedExtrinsic>;
 }
 
@@ -99,12 +105,14 @@ The extension MUST only inject itself into pages having the `window.kilt` object
 (window.kilt as GlobalKilt).myDidExtension = {
     getSignedDidCreationExtrinsic: async (
         submitter: string,
+        pendingDidUri?: string,
     ): Promise<SignedDidCreationExtrinsic> => {
         /*...*/
         return { signedExtrinsic }
     },
     signWithDid: async (
         plaintext: string,
+        didUri: string,
     ): Promise<Signed> => {
         /*...*/
         return { signature, didKeyUri };
@@ -112,6 +120,7 @@ The extension MUST only inject itself into pages having the `window.kilt` object
     signExtrinsicWithDid: async (
         extrinsic: `0x${string}`,
         submitter: string,
+        didUri: string,
     ): Promise<SignedExtrinsic> => {
         /*...*/
         return { signed, didKeyUri };
@@ -142,11 +151,13 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
 
 1. The dApp calls `getSignedDidCreationExtinsic` passing the submitter as a parameter.
 2. The extension presents an interface for generating and signing the on-chain DID creation extrinsic.
-    It SHOULD allow the user to choose the keypair for signing.
-    It SHOULD allow the user to reject the creation and signing of the extrinsic.
+   It SHOULD allow the user to reject the creation and signing of the extrinsic.
+   It SHOULD allow the user to choose the keypair for signing in case the `pendingDidUri` parameter was not provided.
+   When `pendingDidUri` was provided, the extension SHOULD only let the user sign with such a keypair
+   that the resulting extrinsic will create a DID with the same subject as `pendingDidUri`.
 3. The extension generates and signs the on-chain DID creation extrinsic.
-    It MUST include an authentication key.
-    It MAY include other keys and services.
+   It MUST include an authentication key.
+   It MAY include other keys and services.
 4. The extension resolves the promise returned from `getSignedDidCreationExtinsic` with the signed extrinsic.
 
 
@@ -157,7 +168,8 @@ The allowed types for these keys are sr25519, ed25519, and ecdsa.
 2. The extension presents to the user the interface to sign. 
    If `signWithDid` was called, it MUST display the plaintext for user to inspect.
    If `signExtrinsicWithDid` was called, it MUST display the extrinsic details (e.g. section, method, and parameters) for user to inspect.
-   It SHOULD allow the user to choose the DID to use for signing.
+   It SHOULD allow the user to choose the DID to use for signing in case the `didUri` parameter was not provided.
+   When `didUri` was provided, the extension SHOULD only let the user sign with this DID.
    It SHOULD alert the user that this DID will be exposed.
    It SHOULD allow the user to reject the signing.
 3. The extension creates the signature of the plaintext using the authorization key of the chosen DID.
